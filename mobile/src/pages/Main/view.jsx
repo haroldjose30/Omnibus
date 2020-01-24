@@ -7,37 +7,36 @@ import styles from './styles';
 
 const Jsx = (props) => {
 
-  //const iconUri = "https://media.cdnandroid.com/ff/f6/57/cf/imagen-bus-brazil-0thumb.jpg";
-  const iconUri =
-    "https://cdn6.aptoide.com/imgs/f/0/a/f0a6c5b67396977df7890b276e9f0ee2_icon.png?w=256";
+  //TODO: Import icon to local acessts
+  const iconUri = "https://cdn6.aptoide.com/imgs/f/0/a/f0a6c5b67396977df7890b276e9f0ee2_icon.png?w=256";
 
   const {
     onRegionChangeComplete,
-    currentRegion,
-    myRegion,
+    currentMapRegion,
+    currentMyRegion,
     busLineLocations,
-    searchBusLines,
-    setSearchBusLines,
     onPressSearch,
     onPressShareMyLocation,
   } = props;
 
-  console.log('myRegion',myRegion);
-  
+  if (!currentMapRegion) {
+    return (<Text style={styles.mapBlank}>Não foi definida uma regiao inicial</Text>)
+  }
+
   return (
     <>
       <MapView
         onRegionChangeComplete={onRegionChangeComplete}
-        initialRegion={currentRegion}
+        initialRegion={currentMapRegion}
         style={styles.map}
       >
         <Marker
-            key="me"
-            coordinate={{
-              latitude: myRegion.latitude,
-              longitude: myRegion.longitude,
-            }}
-          ></Marker>
+          key="me"
+          coordinate={{
+            latitude: currentMyRegion.latitude,
+            longitude: currentMyRegion.longitude,
+          }}
+        ></Marker>
         {busLineLocations.map(bus => (
           <Marker
             key={bus.user_id}
@@ -48,7 +47,7 @@ const Jsx = (props) => {
           >
             <Image style={styles.mapBusMarckIcon} source={{ uri: iconUri }} />
             <Text style={styles.mapBusMarckText}>{bus.busline_code}</Text>
-            <Callout onPress={() => {}}>
+            <Callout onPress={() => { }}>
               <View style={styles.mapBusMarckCallout}>
                 <Text style={styles.mapBusMarckCalloutTitle}>
                   {bus.busline_code}-{bus.busline_name}
@@ -58,15 +57,13 @@ const Jsx = (props) => {
           </Marker>
         ))}
       </MapView>
-      <View style={styles.searchForm}>
-        <TouchableOpacity onPress={() => { onPressShareMyLocation(); }} style={styles.floatButton}>
+        <TouchableOpacity onPress={() => { onPressShareMyLocation(); }} style={styles.floatButtonShare}>
           <MaterialIcons name="directions-bus" size={20} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => { onPressSearch(); }} style={styles.floatButton}>
+
+        <TouchableOpacity onPress={() => { onPressSearch(); }} style={styles.floatButtonSearch}>
           <MaterialIcons name="search" size={20} color="black" />
         </TouchableOpacity>
-      </View>
-
     </>
   );
 };

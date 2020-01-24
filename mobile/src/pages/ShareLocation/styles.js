@@ -7,14 +7,13 @@ export default StyleSheet.create({
     left: 20,
     right: 20,
   },
-  inputsText: {
+  textInputTitle: {
     fontSize: 16,
     marginBottom:8,
     marginLeft: 15,    
   },
-  inputs: {
+  textInput: {
     height: 50,
-    marginBottom:24,
     backgroundColor: "#FFF",
     color: "#333",
     borderRadius: 25,
@@ -26,7 +25,15 @@ export default StyleSheet.create({
       width: 4,
       height: 4
     },
-    elevation: 2
+    elevation: 2,
+    marginBottom:4,
+  },
+  textInputError: {
+    marginRight: 15,   
+    color: "red", 
+    marginBottom:24,
+    textAlign:"right"
+   
   },
   button: {
     height: 50,

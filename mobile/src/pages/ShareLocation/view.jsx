@@ -12,37 +12,44 @@ const Jsx = (props) => {
         setBusline_code,
         busline_name,
         setBusline_name,
+        errors,
     } = props;
+  
+    const {busline_code_error,busline_name_error} = errors
 
-    const buttonText = (type=='search' ? 'Pesquisar' : 'Embarcar' )
-    const buttonIcon = (type=='search' ? 'search' : 'gps-fixed' )
+    console.log('busline_code_error',busline_code_error);
+  
+
+    const buttonText = (type == 'search' ? 'Pesquisar' : 'Embarcar')
+    const buttonIcon = (type == 'search' ? 'search' : 'gps-fixed')
 
     return (
         <>
 
             <View style={styles.form}>
-                <Text style={styles.inputsText}>Número da Linha</Text>
+                <Text style={styles.textInputTitle}>Número da Linha</Text>
                 <TextInput
-                    style={styles.inputs}
+                    style={styles.textInput}
                     placeholder="022"
                     placeholderTextColor="#999"
                     keyboardType="numeric"
                     autoCorrect={false}
                     value={busline_code}
-                    onChangeText={setBusline_code}
-                />
+                    onChangeText={setBusline_code} />
+                <Text style={styles.textInputError}>{busline_code_error}</Text>
 
-                <Text  style={styles.inputsText}>Nome da Linha</Text>
+                <Text style={styles.textInputTitle}>Nome da Linha</Text>
                 <TextInput
-                    style={styles.inputs}
+                    style={styles.textInput}
                     placeholder="INTER BAIRROS II"
                     placeholderTextColor="#999"
                     autoCorrect={false}
                     value={busline_name}
-                    onChangeText={setBusline_name}
-                />
+                    onChangeText={setBusline_name} />
+                <Text style={styles.textInputError}>{busline_name_error}</Text>
 
-                <TouchableOpacity onPress={() => { buttonCallBack(busline_code,busline_name) }} style={styles.button}>
+
+                <TouchableOpacity onPress={() => { buttonCallBack() }} style={styles.button}>
                     <MaterialIcons name={buttonIcon} size={20} color="black" />
                     <Text>  {buttonText}</Text>
                 </TouchableOpacity>
