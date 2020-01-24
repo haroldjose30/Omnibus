@@ -10,6 +10,8 @@ let io;
  * Configuring websockets
  */
 exports.setupWebsocket = server => {
+  const token = 'token'
+  const cookie = 'cookie'
   io = socketio(server);
 
   //monitoring the clients connections
@@ -19,9 +21,13 @@ exports.setupWebsocket = server => {
     const {
       latitude,
       longitude,
-      searchBusLines,
+      searchBusLineCode,
+      searchBusLineName,
       user_id
     } = socket.handshake.query;
+    
+    console.log('socket.handshake.query',socket.handshake.query);
+    
 
     //remove an connection from the same user
     const connectionFromThisUser = connections.find(connection => {
@@ -42,7 +48,8 @@ exports.setupWebsocket = server => {
         latitude: Number(latitude),
         longitude: Number(longitude)
       },
-      searchBusLines: searchBusLines,
+      searchBusLineCode:searchBusLineCode,
+      searchBusLineName: searchBusLineName,
       datetime: new Date()
     });
     
@@ -64,9 +71,12 @@ exports.setupWebsocket = server => {
 /**
  * Return connection with math query filters
  */
-exports.findConnections = (coordinates, searchBusLines) => {
+exports.findConnections = (coordinates, searchBusLineCode,searchBusLineName) => {
+  console.log('connections',connections);
+  
   return connections.filter(connection => {
     return calculateDistance(coordinates, connection.coordinates) < 10; //10 kilometers
+    //TODO: filter by buslineCode or BusLineName
     //&& connection.searchBusLines.some(item => searchBusLines == item) //todo: make filter by line number or description
   });
 };

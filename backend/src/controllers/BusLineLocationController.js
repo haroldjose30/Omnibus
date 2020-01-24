@@ -1,14 +1,16 @@
-const BusLineLocation = require("../models/BusLineLocation");
-const { findConnections, sendMessage } = require("../websocket");
+const BusLineLocation = require('../models/BusLineLocation');
+const { findConnections, sendMessage } = require('../websocket');
 
 module.exports = {
   /**
    * Return all location in determined region
    */
   async index(request, response) {
-    const { latitude, longitude, busline_search } = request.query;
+    const { latitude, longitude, busline_code, busline_name } = request.query;
 
-    //buscar todos num raio 10km
+    
+
+    //Filter all buslins on 10km radius, from coordenates
     const locationSearch = {
       $near: {
         $geometry: {
@@ -26,25 +28,30 @@ module.exports = {
 
     let busLineLocations = [];
 
-    //verify if needed filter by line code or description
-    if (busline_search != null && busline_search.trim() !== "") {
-      //if integer search by code
-      if (!isNaN(busline_search)) {
-        busLineLocations = await BusLineLocation.find({
-          location: locationSearch,
-          busline_code: busline_search
-          //datetime: dateSearch,
-        });
-      } else {
-        //search by name
-        busLineLocations = await BusLineLocation.find({
-          location: locationSearch,
-          busline_name: { $regex: busline_search }
-          //datetime: dateSearch,
-        });
-      }
+    //verify if needed filter by Bus line code 
+    if (busline_code && busline_code.trim() !== "") {
+      
+      busLineLocations = await BusLineLocation.find({
+        location: locationSearch,
+        busline_code: busline_code,
+        //datetime: dateSearch,
+      });
+
       return response.json({ busLineLocation: busLineLocations });
     }
+
+
+    //verify if needed filter by Bus line name 
+    if (busline_name && busline_name.trim() !== "") {
+      busLineLocations = await BusLineLocation.find({
+        location: locationSearch,
+        busline_name: { $regex: busline_name }
+        //datetime: dateSearch,
+      });
+
+      return response.json({ busLineLocation: busLineLocations });
+    }
+
 
     busLineLocations = await BusLineLocation.find({
       location: locationSearch
@@ -55,7 +62,7 @@ module.exports = {
   },
 
   /**
-   * Create a new User
+   * register a new location for a Bus line
    */
   async store(request, response) {
     const {
@@ -72,11 +79,11 @@ module.exports = {
       type: "Point",
       coordinates: [longitude, latitude]
     };
-   
+
 
     //verify if this user has one connection
-    let busLineLocation = await BusLineLocation.findOne( { user_id: user_id });
-    
+    let busLineLocation = await BusLineLocation.findOne({ user_id: user_id });
+
 
     if (!busLineLocation) {
       await BusLineLocation.create({
@@ -99,16 +106,17 @@ module.exports = {
       );
     }
 
-    busLineLocation = await BusLineLocation.findOne( { user_id: user_id });
+    busLineLocation = await BusLineLocation.findOne({ user_id: user_id });
 
     //get all connections where needed receice updated location
-    const sendSocketMessageTo = findConnections({ latitude, longitude }, "");
+    const sendSocketMessageTo = findConnections({ latitude, longitude }, busline_code, busline_name);
 
+    console.log('sendSocketMessageTo',sendSocketMessageTo,busLineLocation);
+    
     //send data for the receivers
-    sendMessage(sendSocketMessageTo,"Updated-BusLineLocations",busLineLocation);
+    sendMessage(sendSocketMessageTo, "Updated-BusLineLocations", busLineLocation);
 
-    console.log('busLineLocation',busLineLocation);
-
+  
     return response.json({ busLineLocation });
   }
 };
