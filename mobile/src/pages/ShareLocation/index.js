@@ -32,9 +32,6 @@ function ShareLocation({ navigation }) {
             setErrors({busline_name_error:'campo obrigatório'})
             return;
         }
-
-        console.log('busline_code',busline_code);
-        console.log('busline_name',busline_name);
         
         navigation.goBack();
         buttonCallBack(busline_code, busline_name);

@@ -4,27 +4,51 @@ import api from "../../services/api"
 import { connect, disconnect, subscribeToUpdatedBusLineLocations } from "../../services/socket"
 import { create_UUID } from "../../utils/utils"
 import Jsx from './view'
-
-/**
- * Load current UUID
- */
-
-
+import * as Location from 'expo-location';
+import Global from '../../utils/global'
+import taskManager from '../../services/taskManager'
 
 function Main({ navigation }) {
 
-
-  //declare state from components
-  const [busLineLocations, setBusLineLocations] = useState([])
+  //todo: make this global states
   const [currentMapRegion, setCurrentMapRegion] = useState(null)
   const [currentMyRegion, setCurrentMyRegion] = useState({
     latitude: 0,
     longitude: 0,
   })
+
+  //local states
+  const [busLineLocations, setBusLineLocations] = useState([])
   const [searchBusLineCode, setSearchBusLineCode] = useState("")
   const [searchBusLineName, setSearchBusLineName] = useState("")
   //TODO: Save this in local shared property, for same use until uninstall app
-  const current_user_id = create_UUID()
+  //Load current UUID
+  const [current_user_id] = useState(create_UUID())
+
+
+  /**
+   * Load on map my current position
+   */
+  async function setMyCurrentPositionOnMap() {
+    const { granted } = await requestPermissionsAsync()
+
+    if (granted) {
+
+      const { latitude, longitude } = await getMyCurrentPosition()
+
+      setCurrentMapRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.03,
+        longitudeDelta: 0.03
+      })
+
+      setCurrentMyRegion({
+        latitude,
+        longitude
+      })
+    }
+  }
 
   /**
    * Executed on start application
@@ -32,33 +56,10 @@ function Main({ navigation }) {
    */
   //TODO: make test when permission is denied by user
   useEffect(() => {
-
-    async function loadInicialPosition() {
-      const { granted } = await requestPermissionsAsync()
-
-      if (granted) {
-        const { coords } = await getCurrentPositionAsync({
-          enableHighAccuracy: true
-        })
-
-        const { latitude, longitude } = coords
-
-        setCurrentMapRegion({
-          latitude,
-          longitude,
-          latitudeDelta: 0.03,
-          longitudeDelta: 0.03
-        })
-
-        setCurrentMyRegion({
-          latitude,
-          longitude
-        })
-      }
-    }
-
-
-    loadInicialPosition()
+    Global.setCurrentMapRegionFun(setCurrentMapRegion)
+    Global.setCurrentMyRegionFun(setCurrentMyRegion)
+    Global.sendBusLineLocationToBackend(sendBusLineLocationToBackend)
+    setMyCurrentPositionOnMap()
   }, [])
 
   /**
@@ -66,38 +67,108 @@ function Main({ navigation }) {
    * Subscribed to get updated locations from websocket backend
    */
   useEffect(() => {
-      subscribeToUpdatedBusLineLocations(updatedBusLineLocation => {
-        //console.log('updatedBusLineLocation',updatedBusLineLocation);
-        console.log('busLineLocations',busLineLocations);
-      
-        const itemFounded = busLineLocations.find(item => {
-          return item.user_id == updatedBusLineLocation.user_id
-        })
-  
-        //TODO: Need to ignore locations older than 10 minutes
-        if (itemFounded) {
-          const newBusLineLocations = busLineLocations.map(function (oldBusLineLocation) {
-            return oldBusLineLocation.user_id == updatedBusLineLocation.user_id
-              ? updatedBusLineLocation
-              : oldBusLineLocation
-          })
-          setBusLineLocations(newBusLineLocations)
-        } else {
-          const newBusLineLocations = [
-            ...busLineLocations,
-            updatedBusLineLocation
-          ]
-          setBusLineLocations(newBusLineLocations)
-        }
+    subscribeToUpdatedBusLineLocations(updatedBusLineLocation => {
+      const itemFounded = busLineLocations.find(item => {
+        return item.user_id == updatedBusLineLocation.user_id
       })
-    
+
+      //TODO: Need to ignore locations older than 10 minutes
+      if (itemFounded) {
+        const newBusLineLocations = busLineLocations.map(function (oldBusLineLocation) {
+          return oldBusLineLocation.user_id == updatedBusLineLocation.user_id
+            ? updatedBusLineLocation
+            : oldBusLineLocation
+        })
+        setBusLineLocations(newBusLineLocations)
+      } else {
+        const newBusLineLocations = [
+          ...busLineLocations,
+          updatedBusLineLocation
+        ]
+        setBusLineLocations(newBusLineLocations)
+      }
+    })
+
   }, [busLineLocations])
+
+
+  /**
+   * send My Current LineBus Location To Backend
+   * This process will update via WebSocket to another user
+   */
+  async function sendBusLineLocationToBackend(region,busline_code,busline_name) {
+    console.log('sendBusLineLocationToBackend',region,busline_code,busline_name);
+   
+    if (region == null) {
+      region = currentMyRegion
+    }
+
+    if (busline_code ==  undefined || busline_code ==  null ) {
+      busline_code = searchBusLineCode
+      console.log('searchBusLineCode',searchBusLineCode,busline_code);
+      
+    }
+
+    if (busline_name ==  undefined || busline_name ==  null) {
+      busline_name = searchBusLineName
+      console.log('searchBusLineName',searchBusLineName,busline_name);
+    }
+
+    const { latitude, longitude } = region
+
+    if (!latitude || !longitude) {
+      return
+    }
+
+    console.log('sendBusLineLocationToBackend',latitude,longitude,busline_code,busline_name);
+    await api.post("/BusLineLocation", {
+      user_id:current_user_id,
+      latitude,
+      longitude,
+      busline_code,
+      busline_name
+    }).catch(error => {
+      //TODO: catch api error 500, 400, etc
+      console.debug('error:', error)
+    });
+
+  }
+
+  /**
+   * trigger event each current located is updated 
+   */
+  async function startLocationUpdates() {
+    await Location.startLocationUpdatesAsync(Global.BACKGROUD_LOCATION_UPDATE_TASK, {
+      accuracy: Location.Accuracy.High,
+      showsBackgroundLocationIndicator: true,
+      // timeInterval: 60000,
+      // distanceInterval: 1000,
+      // foregroundService: {
+      //   notificationTitle: "Omnistack embarcado",
+      //   notificationBody: "atualizando localização"
+      // },
+    });
+
+  }
+
+
+
+  /**
+   * retorna a localização atual do device
+   */
+  async function getMyCurrentPosition() {
+    const { coords } = await getCurrentPositionAsync({
+      enableHighAccuracy: true
+    })
+
+    return { latitude: coords.latitude, longitude: coords.longitude }
+  }
 
   /**
    * setup Web socket
    */
   function setupWebsocket() {
-   
+
 
     if (!currentMapRegion) {
       return
@@ -108,18 +179,25 @@ function Main({ navigation }) {
     connect(latitude, longitude, searchBusLineCode, searchBusLineName, current_user_id)
   }
 
+  /**
+   * start sharing location based on busLine clicked or when callback from form input data page
+   */
+  async function onPressShareMyLocationCallBack(busline_code, busline_name) {
+    setSearchBusLineCode(busline_code)
+    setSearchBusLineName(busline_name)
+    await setMyCurrentPositionOnMap()
+    await sendBusLineLocationToBackend(currentMyRegion,busline_code,busline_name)
+    startLocationUpdates()
+  }
 
-
+  /**
+   * Click button to share my location, will send the user to ShareLocation Page
+   */
   function onPressShareMyLocation() {
-
-    function buttonCallBackCompartilhar(busline_code, busline_name) {
-      //TODO: not implemented
-    }
-
 
     navigation.navigate("ShareLocation", {
       type: 'share',
-      buttonCallBack: buttonCallBackCompartilhar,
+      buttonCallBack: onPressShareMyLocationCallBack,
       inputBusLineCodeValue: searchBusLineCode,
       inputBusLineNameValue: searchBusLineName,
       inputBusLineCodeRequired: true,
@@ -127,11 +205,15 @@ function Main({ navigation }) {
     })
   }
 
+  /**
+   * Filter data to search a especific busLine
+   */
+  function onPressSearch() {
 
-
-  async function onPressSearch() {
-
-    function buttonCallBackPesquisar(busline_code, busline_name) {
+    /**
+     * Callback function when user come back from ShareLocation Page 
+     */
+    function onPressSearchCallBack(busline_code, busline_name) {
       setSearchBusLineCode(busline_code)
       setSearchBusLineName(busline_name)
       LoadBusLineFromRegion(currentMapRegion, busline_code, busline_name)
@@ -139,7 +221,7 @@ function Main({ navigation }) {
 
     navigation.navigate("ShareLocation", {
       type: 'search',
-      buttonCallBack: buttonCallBackPesquisar,
+      buttonCallBack: onPressSearchCallBack,
       inputBusLineCodeValue: searchBusLineCode,
       inputBusLineNameValue: searchBusLineName,
       inputBusLineCodeRequired: false,
@@ -148,14 +230,24 @@ function Main({ navigation }) {
   }
 
 
-
+  /**
+   * handler when user change position manualy in map
+   * Load bus lines from selected region, by 10km radiuns
+   */
   function onRegionChangeComplete(region) {
+    console.log('onRegionChangeComplete');
     setCurrentMapRegion(region)
     LoadBusLineFromRegion(region, searchBusLineCode, searchBusLineName)
   }
 
+  /**
+   * seach all busline by code or name from specific region, by 10km radius
+   * @param {region, latitude and longitud} region 
+   * @param {number of bus line} busline_code 
+   * @param {name of bus line} busline_name 
+   */
   async function LoadBusLineFromRegion(region, busline_code, busline_name) {
-   
+
     if (!region) {
       return
     }
@@ -175,7 +267,7 @@ function Main({ navigation }) {
       }
     }).catch(error => {
       //TODO: catch api error 500, 400, etc
-      console.log('error:', error)
+      console.debug('error:', error)
     });
 
     if (response && response.data && response.data.busLineLocation) {
@@ -185,6 +277,9 @@ function Main({ navigation }) {
 
   }
 
+  /**
+   * return View from Jsx Template file
+   */
   return (
     <Jsx
       onRegionChangeComplete={onRegionChangeComplete}
@@ -193,6 +288,7 @@ function Main({ navigation }) {
       busLineLocations={busLineLocations}
       onPressSearch={onPressSearch}
       onPressShareMyLocation={onPressShareMyLocation}
+      onPressShareMyLocationDirect={onPressShareMyLocationCallBack}
     />
   )
 }

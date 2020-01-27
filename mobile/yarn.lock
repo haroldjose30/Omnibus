@@ -2327,6 +2327,11 @@ expo-sqlite@~8.0.0:
     "@types/websql" "^0.0.27"
     lodash "^4.17.15"
 
+expo-task-manager@~8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/expo-task-manager/-/expo-task-manager-8.0.0.tgz#cf79e11fe2a48217f59896419aff401cdd776c28"
+  integrity sha512-gvb4cRzoZW7xpvX5z34gGhGTyr2LipLgqkbn+/hpyF1gKwySGiWjJOn20/VtjVXSCywTLCgxXbLbg+HzegCenQ==
+
 expo-web-browser@~8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/expo-web-browser/-/expo-web-browser-8.0.0.tgz#8a4451c744c115569a4c810dac8851f219a21c72"
@@ -4319,6 +4324,11 @@ react-dom@~16.9.0:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.15.0"
+
+react-hooks-global-state@^1.0.0-alpha.2:
+  version "1.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/react-hooks-global-state/-/react-hooks-global-state-1.0.0-alpha.2.tgz#4fc4dcb53467ef820ac2d718b6ff65a4854882a4"
+  integrity sha512-RDpqrQ4XYQKtbWPoTnsLadi7HKnthj5FCzbo5wPpdBLSdjftvLPRpd7zypZUOnR8FQjGdSgiXi03+ys0yEjtwA==
 
 react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4, react-is@^16.8.6:
   version "16.12.0"

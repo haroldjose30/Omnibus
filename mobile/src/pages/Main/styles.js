@@ -27,12 +27,22 @@ export default StyleSheet.create({
   mapBusMarckCalloutTitle: {
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 16
+    fontSize: 16,
+    alignItems: "center"
   },
   mapBusMarckCalloutSubTitle: {
     textAlign: "center",
     marginTop: 5,
     color: "#666"
+  },
+  mapBusMarckCalloutButtonShare: {
+    width: 150,
+    height: 50,
+    backgroundColor: "yellow",
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    alignContent:"center"
   },
   floatButtonSearch: {
     position: "absolute",
@@ -57,5 +67,7 @@ export default StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 15
-  }
+  },
+  
+  
 });

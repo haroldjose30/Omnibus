@@ -4,6 +4,8 @@ import { createStackNavigator } from 'react-navigation-stack';
 import Main from './pages/Main';
 import ShareLocation from './pages/ShareLocation';
 
+
+
 const Routes = createAppContainer(
     createStackNavigator({
         Main: {

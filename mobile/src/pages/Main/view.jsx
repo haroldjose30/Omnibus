@@ -17,17 +17,20 @@ const Jsx = (props) => {
     busLineLocations,
     onPressSearch,
     onPressShareMyLocation,
+    onPressShareMyLocationDirect,
   } = props;
 
   if (!currentMapRegion) {
-    return (<Text style={styles.mapBlank}>Não foi definida uma regiao inicial</Text>)
+    return (<Text style={styles.mapBlank}>Carregando mapa...</Text>)
   }
 
   return (
     <>
+      <Text>{currentMapRegion.latitude}/{currentMapRegion.longitude}</Text>
       <MapView
         onRegionChangeComplete={onRegionChangeComplete}
         initialRegion={currentMapRegion}
+        region={currentMapRegion}
         style={styles.map}
       >
         <Marker
@@ -47,22 +50,30 @@ const Jsx = (props) => {
           >
             <Image style={styles.mapBusMarckIcon} source={{ uri: iconUri }} />
             <Text style={styles.mapBusMarckText}>{bus.busline_code}</Text>
-            <Callout onPress={() => { }}>
+            <Callout style={{flexDirection:'row'}}>
               <View style={styles.mapBusMarckCallout}>
                 <Text style={styles.mapBusMarckCalloutTitle}>
                   {bus.busline_code}-{bus.busline_name}
                 </Text>
-              </View>
+                <View style={styles.mapBusMarckCalloutTitle}>
+                    <TouchableOpacity onPress={() => { onPressShareMyLocationDirect(bus.busline_code,bus.busline_name); }} style={styles.mapBusMarckCalloutButtonShare}>
+                    <View style={{flexDirection:"row",alignItems: "center"}}>
+                      <MaterialIcons name="directions-bus" size={30} color="black" />
+                      <Text> Embarcar</Text>     
+                    </View>      
+                  </TouchableOpacity>
+                  </View>
+                </View>
             </Callout>
           </Marker>
         ))}
       </MapView>
         <TouchableOpacity onPress={() => { onPressShareMyLocation(); }} style={styles.floatButtonShare}>
-          <MaterialIcons name="directions-bus" size={20} color="black" />
+          <MaterialIcons name="directions-bus" size={30} color="black" />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => { onPressSearch(); }} style={styles.floatButtonSearch}>
-          <MaterialIcons name="search" size={20} color="black" />
+          <MaterialIcons name="search" size={30} color="black" />
         </TouchableOpacity>
     </>
   );

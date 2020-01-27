@@ -17,9 +17,6 @@ const Jsx = (props) => {
   
     const {busline_code_error,busline_name_error} = errors
 
-    console.log('busline_code_error',busline_code_error);
-  
-
     const buttonText = (type == 'search' ? 'Pesquisar' : 'Embarcar')
     const buttonIcon = (type == 'search' ? 'search' : 'gps-fixed')
 
@@ -34,6 +31,7 @@ const Jsx = (props) => {
                     placeholderTextColor="#999"
                     keyboardType="numeric"
                     autoCorrect={false}
+                    autoCapitalize="characters"
                     value={busline_code}
                     onChangeText={setBusline_code} />
                 <Text style={styles.textInputError}>{busline_code_error}</Text>
@@ -44,13 +42,14 @@ const Jsx = (props) => {
                     placeholder="INTER BAIRROS II"
                     placeholderTextColor="#999"
                     autoCorrect={false}
+                    autoCapitalize="characters"
                     value={busline_name}
                     onChangeText={setBusline_name} />
                 <Text style={styles.textInputError}>{busline_name_error}</Text>
 
 
                 <TouchableOpacity onPress={() => { buttonCallBack() }} style={styles.button}>
-                    <MaterialIcons name={buttonIcon} size={20} color="black" />
+                    <MaterialIcons name={buttonIcon} size={30} color="black" />
                     <Text>  {buttonText}</Text>
                 </TouchableOpacity>
 
