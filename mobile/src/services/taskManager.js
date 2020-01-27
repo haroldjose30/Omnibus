@@ -32,7 +32,7 @@ TaskManager.defineTask(Global.BACKGROUD_LOCATION_UPDATE_TASK, ({ data: { locatio
         longitude
       })
     }
-  });
+});
   
   
   
