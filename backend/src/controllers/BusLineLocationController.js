@@ -28,29 +28,29 @@ module.exports = {
 
     let busLineLocations = [];
 
-    //verify if needed filter by Bus line code 
-    if (busline_code && busline_code.trim() !== "") {
+    // //verify if needed filter by Bus line code 
+    // if (busline_code && busline_code.trim() !== "") {
       
-      busLineLocations = await BusLineLocation.find({
-        location: locationSearch,
-        busline_code: busline_code,
-        //datetime: dateSearch,
-      });
+    //   busLineLocations = await BusLineLocation.find({
+    //     location: locationSearch,
+    //     busline_code: busline_code,
+    //     //datetime: dateSearch,
+    //   });
 
-      return response.json({ busLineLocation: busLineLocations });
-    }
+    //   return response.json({ busLineLocation: busLineLocations });
+    // }
 
 
-    //verify if needed filter by Bus line name 
-    if (busline_name && busline_name.trim() !== "") {
-      busLineLocations = await BusLineLocation.find({
-        location: locationSearch,
-        busline_name: { $regex: busline_name }
-        //datetime: dateSearch,
-      });
+    // //verify if needed filter by Bus line name 
+    // if (busline_name && busline_name.trim() !== "") {
+    //   busLineLocations = await BusLineLocation.find({
+    //     location: locationSearch,
+    //     busline_name: { $regex: busline_name }
+    //     //datetime: dateSearch,
+    //   });
 
-      return response.json({ busLineLocation: busLineLocations });
-    }
+    //   return response.json({ busLineLocation: busLineLocations });
+    // }
 
 
     busLineLocations = await BusLineLocation.find({
@@ -80,6 +80,7 @@ module.exports = {
       coordinates: [longitude, latitude]
     };
 
+    //todo: fix error when table/collection not created on database yet, before to insert the first buslinelocation
 
     //verify if this user has one connection
     let busLineLocation = await BusLineLocation.findOne({ user_id: user_id });
@@ -97,11 +98,10 @@ module.exports = {
       await BusLineLocation.updateOne(
         { user_id: user_id },
         {
-          user_id,
-          datetime,
-          busline_code,
-          busline_name,
-          location
+          datetime:datetime,
+          busline_code:busline_code,
+          busline_name:busline_name,
+          location:location
         }
       );
     }
@@ -109,10 +109,8 @@ module.exports = {
     busLineLocation = await BusLineLocation.findOne({ user_id: user_id });
 
     //get all connections where needed receice updated location
-    const sendSocketMessageTo = findConnections({ latitude, longitude }, busline_code, busline_name);
+    const sendSocketMessageTo = findConnections({ latitude, longitude }, busline_code, busline_name,user_id);
 
-    console.log('sendSocketMessageTo',sendSocketMessageTo,busLineLocation);
-    
     //send data for the receivers
     sendMessage(sendSocketMessageTo, "Updated-BusLineLocations", busLineLocation);
 

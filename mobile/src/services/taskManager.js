@@ -1,9 +1,10 @@
 import * as TaskManager from 'expo-task-manager';
 import Global from '../utils/global'
 
-console.log('TaskManager STARTED');
 
 TaskManager.defineTask(Global.BACKGROUD_LOCATION_UPDATE_TASK, ({ data: { locations }, error }) => {
+    console.log(Platform.OS, 'TaskManager', locations,error);
+    
     if (error) {
       // check `error.message` for more details.
       console.debug('Received new locations error', error);
@@ -13,8 +14,14 @@ TaskManager.defineTask(Global.BACKGROUD_LOCATION_UPDATE_TASK, ({ data: { locatio
     if (locations && locations.length > 0) {
   
       const { latitude, longitude } = locations[0].coords
+
+
   
       //TODO: Create a zoom button on map and save state this latitudeDelta 
+
+
+    
+
       Global.setCurrentMapRegion({
         latitude,
         longitude,
@@ -27,10 +34,19 @@ TaskManager.defineTask(Global.BACKGROUD_LOCATION_UPDATE_TASK, ({ data: { locatio
         longitude
       })
 
+     
+
       Global.sendBusLineLocationToBackend({
         latitude,
         longitude
       })
+
+      Global.updateBusLineRegion(
+        latitude,
+        longitude
+      )
+
+
     }
 });
   

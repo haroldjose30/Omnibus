@@ -1,7 +1,9 @@
 import socketio from 'socket.io-client'
+import Global  from '../utils/global'
+
 const token = 'token'
 const cookie = 'cookie'
-const socket = socketio('http://localhost:3333',{
+const socket = socketio(Global.API_URL,{
     //timeout: 10000,
     //jsonp: false,
     //transports: ['websocket'],
@@ -18,18 +20,18 @@ const socket = socketio('http://localhost:3333',{
     //perMessageDeflate: '-'
   });
 
-const socket_event = 'Updated-BusLineLocations'
-function subscribeToUpdatedBusLineLocations(subscribeFunction) {
+function subscribeToEvent(socketEventName,callBackFunction) {
    
     socket.removeAllListeners()
-    socket.on(socket_event,subscribeFunction)
-    // if (!socket.hasListeners(socket_event)) {
-    //     socket.on(socket_event,subscribeFunction)
+    socket.on(socketEventName,callBackFunction)
+    // if (!socket.hasListeners(socketEventName)) {
+    //     socket.on(socketEventName,callBackFunction)
     // }
 }
 
 
 function connect(latitude,longitude,searchBusLineCode,searchBusLineName,user_id){
+    console.log('user connecting to socket',user_id);
     
     socket.io.opts.query = {
         latitude,
@@ -52,5 +54,5 @@ function disconnect() {
 export {
     connect,
     disconnect,
-    subscribeToUpdatedBusLineLocations,
+    subscribeToEvent,
 };

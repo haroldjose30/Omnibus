@@ -12,6 +12,7 @@
     "axios": "^0.19.1",
     "expo": "~36.0.0",
     "expo-location": "~8.0.0",
+    "expo-secure-store": "~8.0.0",
     "expo-task-manager": "~8.0.0",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",

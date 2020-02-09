@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react"
 import { requestPermissionsAsync, getCurrentPositionAsync } from "expo-location"
 import api from "../../services/api"
-import { connect, disconnect, subscribeToUpdatedBusLineLocations } from "../../services/socket"
-import { create_UUID } from "../../utils/utils"
+import { connect, disconnect, subscribeToEvent } from "../../services/socket"
+import { getUserUUID } from "../../utils/utils"
 import Jsx from './view'
 import * as Location from 'expo-location';
 import Global from '../../utils/global'
-import taskManager from '../../services/taskManager'
 
 function Main({ navigation }) {
 
@@ -21,10 +20,35 @@ function Main({ navigation }) {
   const [busLineLocations, setBusLineLocations] = useState([])
   const [searchBusLineCode, setSearchBusLineCode] = useState("")
   const [searchBusLineName, setSearchBusLineName] = useState("")
-  //TODO: Save this in local shared property, for same use until uninstall app
-  //Load current UUID
-  const [current_user_id] = useState(create_UUID())
+  const [current_user_id, setCurrentUserId] = useState("")
 
+
+  async function updateBusLineRegion(latitude, longitude) {
+    let user_id = await getCurrentUserId()
+    let newBusLineLocation = {
+      user_id:  user_id,
+      datetime: new Date(),
+      busline_code: this.searchBusLineCode,
+      busline_name: this.searchBusLineName,
+      location: {
+        coordinates: [ longitude, latitude ],
+      },
+    }
+
+    console.log(Platform.OS,'updateBusLineRegion-newBusLineLocation',newBusLineLocation);
+    updateBusLineLocation(newBusLineLocation)
+  }
+
+
+  async function getCurrentUserId() {
+    if (current_user_id == '') {
+      let uuid = await getUserUUID()
+      setCurrentUserId(uuid)
+      return uuid
+    }
+
+    return current_user_id;
+  }
 
   /**
    * Load on map my current position
@@ -58,7 +82,8 @@ function Main({ navigation }) {
   useEffect(() => {
     Global.setCurrentMapRegionFun(setCurrentMapRegion)
     Global.setCurrentMyRegionFun(setCurrentMyRegion)
-    Global.sendBusLineLocationToBackend(sendBusLineLocationToBackend)
+    Global.updateBusLineRegionFun(updateBusLineRegion)
+    Global.sendBusLineLocationToBackendFun(sendBusLineLocationToBackend)
     setMyCurrentPositionOnMap()
   }, [])
 
@@ -67,51 +92,60 @@ function Main({ navigation }) {
    * Subscribed to get updated locations from websocket backend
    */
   useEffect(() => {
-    subscribeToUpdatedBusLineLocations(updatedBusLineLocation => {
-      const itemFounded = busLineLocations.find(item => {
-        return item.user_id == updatedBusLineLocation.user_id
-      })
-
-      //TODO: Need to ignore locations older than 10 minutes
-      if (itemFounded) {
-        const newBusLineLocations = busLineLocations.map(function (oldBusLineLocation) {
-          return oldBusLineLocation.user_id == updatedBusLineLocation.user_id
-            ? updatedBusLineLocation
-            : oldBusLineLocation
-        })
-        setBusLineLocations(newBusLineLocations)
-      } else {
-        const newBusLineLocations = [
-          ...busLineLocations,
-          updatedBusLineLocation
-        ]
-        setBusLineLocations(newBusLineLocations)
-      }
-    })
+    const socketEventName = 'Updated-BusLineLocations'
+    subscribeToEvent(socketEventName, subscribeToUpdatedBusLineLocations)
 
   }, [busLineLocations])
+
+
+  function subscribeToUpdatedBusLineLocations(newBusLineLocation) {
+    updateBusLineLocation(newBusLineLocation)
+  }
+
+  function updateBusLineLocation(newBusLineLocation) {
+    console.log(Platform.OS, 'busLineLocations', busLineLocations);
+    console.log(Platform.OS, 'updatedBusLineLocation', newBusLineLocation);
+    console.log(Platform.OS, '------------------------------');
+
+    const itemFounded = busLineLocations.find(item => {
+      return item.user_id == newBusLineLocation.user_id
+    })
+
+
+    //TODO: Need to ignore locations older than 10 minutes
+    if (itemFounded) {
+      const newBusLineLocations = busLineLocations.map(function (oldBusLineLocation) {
+        return oldBusLineLocation.user_id == newBusLineLocation.user_id
+          ? newBusLineLocation
+          : oldBusLineLocation
+      })
+      setBusLineLocations(newBusLineLocations)
+    } else {
+      const newBusLineLocations = [
+        ...busLineLocations,
+        newBusLineLocation
+      ]
+
+      setBusLineLocations(newBusLineLocations)
+    }
+  }
 
 
   /**
    * send My Current LineBus Location To Backend
    * This process will update via WebSocket to another user
    */
-  async function sendBusLineLocationToBackend(region,busline_code,busline_name) {
-    console.log('sendBusLineLocationToBackend',region,busline_code,busline_name);
-   
+  async function sendBusLineLocationToBackend(region, busline_code, busline_name) {
     if (region == null) {
       region = currentMyRegion
     }
 
-    if (busline_code ==  undefined || busline_code ==  null ) {
+    if (typeof (busline_code) == 'undefined' || busline_code == null) {
       busline_code = searchBusLineCode
-      console.log('searchBusLineCode',searchBusLineCode,busline_code);
-      
     }
 
-    if (busline_name ==  undefined || busline_name ==  null) {
+    if (typeof (busline_name) == 'undefined' || busline_name == null) {
       busline_name = searchBusLineName
-      console.log('searchBusLineName',searchBusLineName,busline_name);
     }
 
     const { latitude, longitude } = region
@@ -120,9 +154,13 @@ function Main({ navigation }) {
       return
     }
 
-    console.log('sendBusLineLocationToBackend',latitude,longitude,busline_code,busline_name);
+    if (busline_code == '') {
+      return
+    }
+
+    let user_id = await getCurrentUserId()
     await api.post("/BusLineLocation", {
-      user_id:current_user_id,
+      user_id: user_id,
       latitude,
       longitude,
       busline_code,
@@ -131,6 +169,15 @@ function Main({ navigation }) {
       //TODO: catch api error 500, 400, etc
       console.debug('error:', error)
     });
+
+    console.log(Platform.OS,'sendBusLineLocationToBackend',{
+      user_id: user_id,
+      latitude,
+      longitude,
+      busline_code,
+      busline_name
+    });
+    
 
   }
 
@@ -167,7 +214,7 @@ function Main({ navigation }) {
   /**
    * setup Web socket
    */
-  function setupWebsocket() {
+  async function setupWebsocket() {
 
 
     if (!currentMapRegion) {
@@ -176,7 +223,8 @@ function Main({ navigation }) {
 
     const { latitude, longitude } = currentMapRegion
     disconnect()
-    connect(latitude, longitude, searchBusLineCode, searchBusLineName, current_user_id)
+    let user_id = await getCurrentUserId()
+    connect(latitude, longitude, searchBusLineCode, searchBusLineName, user_id)
   }
 
   /**
@@ -186,9 +234,24 @@ function Main({ navigation }) {
     setSearchBusLineCode(busline_code)
     setSearchBusLineName(busline_name)
     await setMyCurrentPositionOnMap()
-    await sendBusLineLocationToBackend(currentMyRegion,busline_code,busline_name)
+    await sendBusLineLocationToBackend(currentMyRegion, busline_code, busline_name)
+
+    let user_id = await getCurrentUserId()
+    const { latitude, longitude } = currentMapRegion
+    let newBusLineLocation = {
+      user_id:  user_id,
+      datetime: new Date(),
+      busline_code: busline_code,
+      busline_name: busline_name,
+      location: {
+        coordinates: [ longitude, latitude ],
+      },
+    }
+    updateBusLineLocation(newBusLineLocation)
     startLocationUpdates()
   }
+
+  
 
   /**
    * Click button to share my location, will send the user to ShareLocation Page
@@ -235,9 +298,9 @@ function Main({ navigation }) {
    * Load bus lines from selected region, by 10km radiuns
    */
   function onRegionChangeComplete(region) {
-    console.log('onRegionChangeComplete');
     setCurrentMapRegion(region)
     LoadBusLineFromRegion(region, searchBusLineCode, searchBusLineName)
+
   }
 
   /**
@@ -272,7 +335,7 @@ function Main({ navigation }) {
 
     if (response && response.data && response.data.busLineLocation) {
       setBusLineLocations(response.data.busLineLocation)
-      setupWebsocket()
+      await setupWebsocket()
     }
 
   }
