@@ -4,8 +4,7 @@ import api from "../../services/api"
 import { connect, disconnect, subscribeToEvent } from "../../services/socket"
 import { getUserUUID } from "../../utils/utils"
 import Jsx from './view'
-import * as Location from 'expo-location';
-import Global from '../../utils/global'
+import { Platform } from "react-native"
 
 function Main({ navigation }) {
 
@@ -26,16 +25,16 @@ function Main({ navigation }) {
   async function updateBusLineRegion(latitude, longitude) {
     let user_id = await getCurrentUserId()
     let newBusLineLocation = {
-      user_id:  user_id,
+      user_id: user_id,
       datetime: new Date(),
-      busline_code: this.searchBusLineCode,
-      busline_name: this.searchBusLineName,
+      busline_code: searchBusLineCode,
+      busline_name: searchBusLineName,
       location: {
-        coordinates: [ longitude, latitude ],
+        coordinates: [longitude, latitude],
       },
     }
 
-    console.log(Platform.OS,'updateBusLineRegion-newBusLineLocation',newBusLineLocation);
+    console.log(Platform.OS, 'updateBusLineRegion-newBusLineLocation', newBusLineLocation);
     updateBusLineLocation(newBusLineLocation)
   }
 
@@ -80,11 +79,8 @@ function Main({ navigation }) {
    */
   //TODO: make test when permission is denied by user
   useEffect(() => {
-    Global.setCurrentMapRegionFun(setCurrentMapRegion)
-    Global.setCurrentMyRegionFun(setCurrentMyRegion)
-    Global.updateBusLineRegionFun(updateBusLineRegion)
-    Global.sendBusLineLocationToBackendFun(sendBusLineLocationToBackend)
     setMyCurrentPositionOnMap()
+
   }, [])
 
   /**
@@ -136,16 +132,10 @@ function Main({ navigation }) {
    * This process will update via WebSocket to another user
    */
   async function sendBusLineLocationToBackend(region, busline_code, busline_name) {
+    console.log(Platform.OS,'sendBusLineLocationToBackend',region, busline_code, busline_name);
+    
     if (region == null) {
       region = currentMyRegion
-    }
-
-    if (typeof (busline_code) == 'undefined' || busline_code == null) {
-      busline_code = searchBusLineCode
-    }
-
-    if (typeof (busline_name) == 'undefined' || busline_name == null) {
-      busline_name = searchBusLineName
     }
 
     const { latitude, longitude } = region
@@ -170,32 +160,37 @@ function Main({ navigation }) {
       console.debug('error:', error)
     });
 
-    console.log(Platform.OS,'sendBusLineLocationToBackend',{
+    console.log(Platform.OS, 'sendBusLineLocationToBackend', {
       user_id: user_id,
       latitude,
       longitude,
       busline_code,
       busline_name
     });
-    
+
 
   }
 
+
+
+  //TODO: create a stoplocation, and a timer for stop location for 1hour
   /**
    * trigger event each current located is updated 
    */
   async function startLocationUpdates() {
-    await Location.startLocationUpdatesAsync(Global.BACKGROUD_LOCATION_UPDATE_TASK, {
-      accuracy: Location.Accuracy.High,
-      showsBackgroundLocationIndicator: true,
-      // timeInterval: 60000,
-      // distanceInterval: 1000,
-      // foregroundService: {
-      //   notificationTitle: "Omnistack embarcado",
-      //   notificationBody: "atualizando localização"
-      // },
-    });
-
+     //Insert this into your componentDidMount or 
+    //other functions to track and publish users positions. 
+    //Part of the React Native Geolocation API - no need to import
+    navigator.geolocation.watchPosition(
+      position => {
+        newPositionReceived(position)
+      },
+      error => console.log("Maps Error: ", error),
+      {
+        enableHighAccuracy: true,
+        distanceFilter: 1
+      }
+    );   
   }
 
 
@@ -239,19 +234,19 @@ function Main({ navigation }) {
     let user_id = await getCurrentUserId()
     const { latitude, longitude } = currentMapRegion
     let newBusLineLocation = {
-      user_id:  user_id,
+      user_id: user_id,
       datetime: new Date(),
       busline_code: busline_code,
       busline_name: busline_name,
       location: {
-        coordinates: [ longitude, latitude ],
+        coordinates: [longitude, latitude],
       },
     }
     updateBusLineLocation(newBusLineLocation)
     startLocationUpdates()
   }
 
-  
+
 
   /**
    * Click button to share my location, will send the user to ShareLocation Page
@@ -338,6 +333,45 @@ function Main({ navigation }) {
       await setupWebsocket()
     }
 
+  }
+
+
+
+  function newPositionReceived(position) {
+    console.log(Platform.OS, 'position', position);
+
+    if (position) {
+
+      const { latitude, longitude } = position.coords
+
+      //TODO: Create a zoom button on map and save state this latitudeDelta 
+      setCurrentMapRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.03,
+        longitudeDelta: 0.03
+      })
+
+      setCurrentMyRegion({
+        latitude,
+        longitude
+      })
+
+      sendBusLineLocationToBackend({
+        latitude,
+        longitude
+      },
+        searchBusLineCode,
+        searchBusLineName
+      )
+
+      updateBusLineRegion(
+        latitude,
+        longitude
+      )
+
+
+    }
   }
 
   /**

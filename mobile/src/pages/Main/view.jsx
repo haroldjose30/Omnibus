@@ -21,7 +21,8 @@ const Jsx = (props) => {
   } = props;
 
   if (!currentMapRegion) {
-    return (<Text style={styles.mapBlank}>Carregando mapa...</Text>)
+    
+    return (<Text style={styles.mapBlank}>Carregando...</Text>)
   }
 
   return (
