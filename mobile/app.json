@@ -1,10 +1,10 @@
 {
   "expo": {
     "name": "Omnibus",
-    "description":"Community realtime bus location",
+    "description": "Community realtime bus locator",
     "slug": "omnibus",
-    "owner":"Harold José de Barros Gonçalves",
-    "githubUrl":"https://github.com/haroldjose30/Omnibus",
+    "owner": "Harold José de Barros Gonçalves",
+    "githubUrl": "https://github.com/haroldjose30/Omnibus",
     "privacy": "public",
     "sdkVersion": "36.0.0",
     "platforms": [
@@ -12,7 +12,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -27,14 +27,18 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.haroldjose.omnibus",
+      "buildNumber": "0.1.0"
     },
-    "android":{
+    "android": {
+      "package": "dev.haroldjose.omnibus",
+      "versionCode": 1,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "VIBRATE",
-        "WAKE_LOCK"        
+        "WAKE_LOCK"
       ]
     }
   }
