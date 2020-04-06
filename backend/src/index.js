@@ -5,13 +5,14 @@ const http = require('http');
 
 const routes = require('./rotes');
 const { setupWebsocket } = require('./websocket');
+var Secrets = require('./secrets')
 
 const app = express();
 const server = http.Server(app);
 
 setupWebsocket(server);
 
-mongoose.connect('mongodb+srv://OmnibusUser:OmnibusUser@haroldjose30-ftano.gcp.mongodb.net/OmnibusDb?retryWrites=true&w=majority',{
+mongoose.connect(Secrets.MONGO_DB_CONNECTION_KEY,{
     useNewUrlParser:true,
     useUnifiedTopology:true,
     useCreateIndex:true,
