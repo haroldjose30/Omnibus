@@ -5,7 +5,7 @@ const http = require('http');
 
 const routes = require('./rotes');
 const { setupWebsocket } = require('./websocket');
-var Secrets = require('./secrets')
+var Secrets = require('./secrets_real')
 
 const app = express();
 const server = http.Server(app);

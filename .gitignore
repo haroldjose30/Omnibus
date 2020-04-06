@@ -198,5 +198,4 @@ dist
 
 # TernJS port file
 .tern-port
-backend/src/secrets.js
-backend/src/secrets.js
+backend/src/secrets_real.js
