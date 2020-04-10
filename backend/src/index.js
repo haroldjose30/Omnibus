@@ -12,6 +12,10 @@ const server = http.Server(app);
 
 setupWebsocket(server);
 
+console.log("Secrets.MONGO_DB_CONNECTION_KEY",Secrets.MONGO_DB_CONNECTION_KEY);
+console.log("Secrets.FIXED_ACCESS_TOKEN",Secrets.FIXED_ACCESS_TOKEN);
+
+
 mongoose.connect(Secrets.MONGO_DB_CONNECTION_KEY,{
     useNewUrlParser:true,
     useUnifiedTopology:true,
