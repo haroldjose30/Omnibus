@@ -51,18 +51,18 @@ const Jsx = (props) => {
           >
             <Image style={styles.mapBusMarckIcon} source={{ uri: iconUri }} />
             <Text style={styles.mapBusMarckText}>{bus.busline_code}</Text>
-            <Callout style={{flexDirection:'row'}}>
+            <Callout style={{flexDirection:'row'}} onPress={() => { onPressShareMyLocation(bus.busline_code,bus.busline_name); }} >
               <View style={styles.mapBusMarckCallout}>
                 <Text style={styles.mapBusMarckCalloutTitle}>
                   {bus.busline_code}-{bus.busline_name}
                 </Text>
                 <View style={styles.mapBusMarckCalloutTitle}>
-                    <TouchableOpacity onPress={() => { onPressShareMyLocationDirect(bus.busline_code,bus.busline_name); }} style={styles.mapBusMarckCalloutButtonShare}>
+                    {/* <TouchableOpacity style={styles.mapBusMarckCalloutButtonShare}> */}
                     <View style={{flexDirection:"row",alignItems: "center"}}>
                       <MaterialIcons name="directions-bus" size={30} color="black" />
                       <Text> Embarcar</Text>     
                     </View>      
-                  </TouchableOpacity>
+                  {/* </TouchableOpacity> */}
                   </View>
                 </View>
             </Callout>
@@ -73,9 +73,10 @@ const Jsx = (props) => {
           <MaterialIcons name="directions-bus" size={30} color="black" />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => { onPressSearch(); }} style={styles.floatButtonSearch}>
+        {//TODO: this feature to search has a bug, we need divide variables when sharing then searching, this causing conflicts
+        /* <TouchableOpacity onPress={() => { onPressSearch(); }} style={styles.floatButtonSearch}>
           <MaterialIcons name="search" size={30} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
     </>
   );
 };

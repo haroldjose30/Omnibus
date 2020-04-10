@@ -251,13 +251,22 @@ function Main({ navigation }) {
   /**
    * Click button to share my location, will send the user to ShareLocation Page
    */
-  function onPressShareMyLocation() {
+  function onPressShareMyLocation(busLineCode,busLineName) {
+    console.log("onPressShareMyLocation",busLineCode,busLineName);
+    
+    if (!busLineCode || busLineCode.trim() == "") {
+      busLineCode=searchBusLineCode
+    }
+
+    if (!busLineName || busLineName.trim() == "") {
+      busLineName =  searchBusLineName
+    }
 
     navigation.navigate("ShareLocation", {
       type: 'share',
       buttonCallBack: onPressShareMyLocationCallBack,
-      inputBusLineCodeValue: searchBusLineCode,
-      inputBusLineNameValue: searchBusLineName,
+      inputBusLineCodeValue: busLineCode,
+      inputBusLineNameValue: busLineName,
       inputBusLineCodeRequired: true,
       inputBusLineNameRequired: true,
     })
@@ -385,7 +394,7 @@ function Main({ navigation }) {
       busLineLocations={busLineLocations}
       onPressSearch={onPressSearch}
       onPressShareMyLocation={onPressShareMyLocation}
-      onPressShareMyLocationDirect={onPressShareMyLocationCallBack}
+      onPressShareMyLocationDirect={onPressShareMyLocation} //onPressShareMyLocationCallBack
     />
   )
 }
