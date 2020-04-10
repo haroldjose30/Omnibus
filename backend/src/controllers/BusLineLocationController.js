@@ -29,28 +29,28 @@ module.exports = {
     let busLineLocations = [];
 
     //verify if needed filter by Bus line code 
-    if (busline_code && busline_code.trim() !== "") {
+    // if (busline_code && busline_code.trim() !== "") {
       
-      busLineLocations = await BusLineLocation.find({
-        location: locationSearch,
-        busline_code: busline_code,
-        datetime: dateSearch,
-      });
+    //   busLineLocations = await BusLineLocation.find({
+    //     location: locationSearch,
+    //     busline_code: busline_code,
+    //     datetime: dateSearch,
+    //   });
 
-      return response.json({ busLineLocation: busLineLocations });
-    }
+    //   return response.json({ busLineLocation: busLineLocations });
+    // }
 
 
     //verify if needed filter by Bus line name 
-    if (busline_name && busline_name.trim() !== "") {
-      busLineLocations = await BusLineLocation.find({
-        location: locationSearch,
-        busline_name: { $regex: busline_name },
-        datetime: dateSearch,
-      });
+    // if (busline_name && busline_name.trim() !== "") {
+    //   busLineLocations = await BusLineLocation.find({
+    //     location: locationSearch,
+    //     busline_name: { $regex: busline_name },
+    //     datetime: dateSearch,
+    //   });
 
-      return response.json({ busLineLocation: busLineLocations });
-    }
+    //   return response.json({ busLineLocation: busLineLocations });
+    // }
 
 
     busLineLocations = await BusLineLocation.find({
