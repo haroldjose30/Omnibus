@@ -21,8 +21,9 @@ CMD cp ./src/secrets_example.js ./src/secrets_real.js && \
 #docker build -t haroldbarros/omnibus:v1.0 .
 
 #To Run a docker image
-#docker run --env=MONGO_DB_CONNECTION_VAR=mongo_db_example  --env=FIXED_ACCESS_TOKEN_VAR=token_example -p3333:3333 haroldbarros/omnibus:v1.0
-
+#docker run --env="MONGO_DB_CONNECTION_VAR=mongo_db_example"  --env="FIXED_ACCESS_TOKEN_VAR=token_example" -p3333:3333 haroldbarros/omnibus:v1.0
+#Example
+#docker run --env="MONGO_DB_CONNECTION_VAR=mongodb+srv://YourMongoDbUser:YourPassword@YourMongoDbServer-ftano.gcp.mongodb.net/YourDataBaseCollection?retryWrites=true&w=majority"  --env="FIXED_ACCESS_TOKEN_VAR=YourSecretAccessToken" -p3333:3333 haroldbarros/omnibus:v1.0
 
 #Then push with the following
 #docker login
