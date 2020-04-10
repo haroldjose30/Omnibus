@@ -28,34 +28,34 @@ module.exports = {
 
     let busLineLocations = [];
 
-    // //verify if needed filter by Bus line code 
-    // if (busline_code && busline_code.trim() !== "") {
+    //verify if needed filter by Bus line code 
+    if (busline_code && busline_code.trim() !== "") {
       
-    //   busLineLocations = await BusLineLocation.find({
-    //     location: locationSearch,
-    //     busline_code: busline_code,
-    //     //datetime: dateSearch,
-    //   });
+      busLineLocations = await BusLineLocation.find({
+        location: locationSearch,
+        busline_code: busline_code,
+        datetime: dateSearch,
+      });
 
-    //   return response.json({ busLineLocation: busLineLocations });
-    // }
+      return response.json({ busLineLocation: busLineLocations });
+    }
 
 
-    // //verify if needed filter by Bus line name 
-    // if (busline_name && busline_name.trim() !== "") {
-    //   busLineLocations = await BusLineLocation.find({
-    //     location: locationSearch,
-    //     busline_name: { $regex: busline_name }
-    //     //datetime: dateSearch,
-    //   });
+    //verify if needed filter by Bus line name 
+    if (busline_name && busline_name.trim() !== "") {
+      busLineLocations = await BusLineLocation.find({
+        location: locationSearch,
+        busline_name: { $regex: busline_name },
+        datetime: dateSearch,
+      });
 
-    //   return response.json({ busLineLocation: busLineLocations });
-    // }
+      return response.json({ busLineLocation: busLineLocations });
+    }
 
 
     busLineLocations = await BusLineLocation.find({
-      location: locationSearch
-      //datetime: dateSearch,
+      location: locationSearch,
+      datetime: dateSearch,
     });
 
     return response.json({ busLineLocation: busLineLocations });
