@@ -1,8 +1,13 @@
 import axios from 'axios';
-import Global  from '../utils/global'
+import Secrets from './secrets_real'
 
 const Api = axios.create({
-    baseURL: Global.API_URL, 
+    baseURL: Secrets.API_URL,
+    headers: {
+        common: {
+          'x-access-token': Secrets.FIXED_ACCESS_TOKEN
+        }
+      }
 });
 
 export default Api

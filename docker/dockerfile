@@ -1,0 +1,26 @@
+FROM node:latest
+
+LABEL maintainer="haroldbarros@gmail.com"
+
+ENV MONGO_DB_CONNECTION_VAR ""
+ENV FIXED_ACCESS_TOKEN_VAR ""
+
+RUN git clone https://github.com/haroldjose30/Omnibus.git
+
+RUN cd Omnibus/backend/src
+WORKDIR /Omnibus/backend/src
+
+RUN ls
+
+RUN cp secrets_example.js secrets_real.js
+
+RUN sed -i 's/MONGO_DB_CONNECTION_VAR/$MONGO_DB_CONNECTION_VAR/g' secrets_real.js
+RUN sed -i 's/FIXED_ACCESS_TOKEN_VAR/$FIXED_ACCESS_TOKEN_VAR/g' secrets_real.js
+
+RUN cd ..
+
+RUN yarn install
+
+EXPOSE 3333
+CMD [ "yarn", "start" ]
+

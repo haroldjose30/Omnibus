@@ -1,9 +1,10 @@
 import socketio from 'socket.io-client'
-import Global  from '../utils/global'
+import Secrets  from './secrets_real'
 
 const token = 'token'
 const cookie = 'cookie'
-const socket = socketio(Global.API_URL,{
+//todo: harold - protect socket
+const socket = socketio(Secrets.API_URL,{
     //timeout: 10000,
     //jsonp: false,
     //transports: ['websocket'],
