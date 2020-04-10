@@ -7,20 +7,25 @@ ENV FIXED_ACCESS_TOKEN_VAR ""
 
 RUN git clone https://github.com/haroldjose30/Omnibus.git
 
-RUN cd Omnibus/backend/src
-WORKDIR /Omnibus/backend/src
-
-RUN ls
-
-RUN cp secrets_example.js secrets_real.js
-
-RUN sed -i 's/MONGO_DB_CONNECTION_VAR/$MONGO_DB_CONNECTION_VAR/g' secrets_real.js
-RUN sed -i 's/FIXED_ACCESS_TOKEN_VAR/$FIXED_ACCESS_TOKEN_VAR/g' secrets_real.js
-
-RUN cd ..
+RUN cd Omnibus/backend
+WORKDIR /Omnibus/backend
 
 RUN yarn install
 
 EXPOSE 3333
-CMD [ "yarn", "start" ]
 
+CMD cp ./src/secrets_example.js ./src/secrets_real.js && \
+    sed -i 's/MONGO_DB_CONNECTION_VAR/$MONGO_DB_CONNECTION_VAR/g' ./src/secrets_real.js && \
+    sed -i 's/FIXED_ACCESS_TOKEN_VAR/$FIXED_ACCESS_TOKEN_VAR/g' ./src/secrets_real.js && \
+    cat ./src/secrets_real.js && \
+    yarn start
+
+#To Build a docker image
+#docker build -t haroldbarros/omnibus:v1.0 .
+
+#To Run a docker image
+#docker run --env=MONGO_DB_CONNECTION_VAR=mongo_db_example  --env=FIXED_ACCESS_TOKEN_VAR=token_example -p3333:3333 haroldbarros/omnibus:v1.0
+
+#Then push with the following
+#docker login
+#docker push haroldbarros/omnibus:v1.0
