@@ -33,6 +33,11 @@
     },
     "android": {
       "package": "dev.haroldjose.omnibus",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDEItfryeVkl4_FNZNlS5KQpHR9eiTUXTc"
+        }
+      },
       "versionCode": 1,
       "permissions": [
         "ACCESS_COARSE_LOCATION",
