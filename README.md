@@ -23,6 +23,7 @@ Google Play - aguardando aprovação
   * Expo
   
 * Backend
+  * Docker
   * Nodejs
   * Socket.io para dados em tempo real
   * MongoDb Atlas cloud database
