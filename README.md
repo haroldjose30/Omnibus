@@ -12,9 +12,9 @@ Desenvolvido em React Native usando Expo como resultado das aulas da semana Omni
   <img src="https://raw.githubusercontent.com/haroldjose30/Omnibus/master/Promo/Phone%20Screenshot%203.jpg" width="300">
 </p>
 
-[Download on Expo](https://expo.io/@haroldjose30/omnibus)
-
-Google Play - aguardando aprovação
+[Download no Expo](https://expo.io/@haroldjose30/omnibus)
+[Download no Google Play](https://play.google.com/store/apps/details?id=dev.haroldjose.omnibus)
+IOS: será liberado mais adiante.
 
 # Tecnologias Utilizadas
 
